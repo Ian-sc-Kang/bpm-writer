@@ -37,19 +37,21 @@ readdir(folderPath, (err, files) => {
       const audioBuffer = await convertToAudioBuffer(buffer);
       console.log(`filename: ${file}👇`);
       console.log("sample rate: ", audioBuffer.sampleRate);
+      console.log("length: ", audioBuffer.getChannelData(0).length);
 
       const audioMono = essentia.audioBufferToMonoSignal(audioBuffer);
+      const Down_Sample_RATE = 16000;
       const downsampledArray = downsampleArray(
         audioMono,
         audioBuffer.sampleRate,
-        16000
+        Down_Sample_RATE
       );
       const vectorFloat = essentia.arrayToVector(downsampledArray);
 
-      const bpm = detectBPM(vectorFloat, audioBuffer.sampleRate);
+      const bpm = detectBPM(vectorFloat, Down_Sample_RATE);
       // const danceability = detectDanceability(
       //   vectorFloat,
-      //   audioBuffer.sampleRate
+      //   Down_Sample_RATE
       // );
 
       rename(
