@@ -3,8 +3,6 @@ import * as esPkg from "essentia.js";
 import { readFile, readdir, rename } from "fs";
 
 const essentia = new esPkg.Essentia(esPkg.EssentiaWASM);
-const essentiaTfInputExtractor =
-  new esPkg.EssentiaModel.EssentiaTFInputExtractor(esPkg.EssentiaWASM);
 
 const folderPath = process.argv[2];
 
@@ -14,51 +12,63 @@ readdir(folderPath, (err, files) => {
     return;
   }
 
-  files
-    .filter((file) => !file.includes("bpm_"))
-    .forEach(async (file) => {
-      const audioFilePath = `${folderPath}/${file}`;
-      console.log("audioFilePath: ", audioFilePath);
-      readFile(audioFilePath, async (err, buffer) => {
-        const audioBuffer = await convertToAudioBuffer(buffer);
-        console.log(`${file}👇`);
-        console.log("sample rate: ", audioBuffer.sampleRate);
+  const audioFiles = files
+    //NOTE: Supported formats: https://github.com/audiojs/audio-decode
+    //NOTE: also exclude hidden files (e.g. .DS_Store)
+    .filter(
+      (file) =>
+        file.endsWith(".mp3") ||
+        file.endsWith(".wav") ||
+        file.endsWith(".flac") ||
+        file.endsWith(".ogg") ||
+        file.endsWith(".opus") ||
+        file.endsWith(".qoa")
+    )
+    .filter((file) => !file.includes("bpm_"));
 
-        // const audioMono =
-        //   essentiaTfInputExtractor.audioBufferToMonoSignal(audioBuffer);
-        // const audioVector = essentiaTfInputExtractor.arrayToVector(audioMono);
+  if (audioFiles.length === 0) {
+    console.log("No audio files to analyze BPM found in the directory");
+    return;
+  }
 
-        const audioMono = essentia.audioBufferToMonoSignal(audioBuffer);
-        const audioVector = essentia.arrayToVector(audioMono);
+  audioFiles.forEach(async (file) => {
+    const audioFilePath = `${folderPath}/${file}`;
+    readFile(audioFilePath, async (err, buffer) => {
+      const audioBuffer = await convertToAudioBuffer(buffer);
+      console.log(`filename: ${file}👇`);
+      console.log("sample rate: ", audioBuffer.sampleRate);
 
-        // https://essentia.upf.edu/reference/std_RhythmExtractor2013.html
-        const computed = essentia.PercivalBpmEstimator(
-          audioVector,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          audioBuffer.sampleRate
-        );
+      const audioMono = essentia.audioBufferToMonoSignal(audioBuffer);
+      const audioVector = essentia.arrayToVector(audioMono);
 
-        console.log("bpm: ", Math.round(computed.bpm));
+      // https://essentia.upf.edu/reference/std_RhythmExtractor2013.html
+      const computed = essentia.PercivalBpmEstimator(
+        audioVector,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        audioBuffer.sampleRate
+      );
 
-        rename(
-          audioFilePath,
-          `${folderPath}/bpm_${Math.round(computed.bpm)}_${file}`,
-          (err) => {
-            if (err) {
-              console.log("Error renaming file: ", err);
-              return;
-            }
+      console.log("bpm: ", Math.round(computed.bpm));
+
+      rename(
+        audioFilePath,
+        `${folderPath}/bpm_${Math.round(computed.bpm)}_${file}`,
+        (err) => {
+          if (err) {
+            console.log("Error renaming file: ", err);
+            return;
           }
-        );
-        console.log(`✅ ${folderPath}/bpm_${Math.round(computed.bpm)}_${file}`);
-        console.log("-----------------------------");
-      });
+        }
+      );
+      console.log(`✅ ${folderPath}/bpm_${Math.round(computed.bpm)}_${file}`);
+      console.log("-----------------------------");
     });
+  });
 });
 
 async function convertToAudioBuffer(buffer: Buffer) {
