@@ -65,7 +65,7 @@ readdir(folderPath, (err, files) => {
           }
         }
       );
-      console.log(`✅ ${folderPath}/bpm_${Math.round(computed.bpm)}_${file}`);
+      console.log(`✅ bpm_${Math.round(computed.bpm)}_${file}`);
       console.log("-----------------------------");
     });
   });
