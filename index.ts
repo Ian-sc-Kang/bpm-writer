@@ -39,7 +39,12 @@ readdir(folderPath, (err, files) => {
       console.log("sample rate: ", audioBuffer.sampleRate);
 
       const audioMono = essentia.audioBufferToMonoSignal(audioBuffer);
-      const vectorFloat = essentia.arrayToVector(audioMono);
+      const downsampledArray = downsampleArray(
+        audioMono,
+        audioBuffer.sampleRate,
+        16000
+      );
+      const vectorFloat = essentia.arrayToVector(downsampledArray);
 
       const bpm = detectBPM(vectorFloat, audioBuffer.sampleRate);
       // const danceability = detectDanceability(
@@ -95,4 +100,39 @@ function detectDanceability(vectorFloat: any, sampleRate: number) {
     undefined
   );
   return Math.round(computed.danceability * 10) / 10;
+}
+
+function downsampleArray(
+  audioIn: Float32Array,
+  sampleRateIn: number,
+  sampleRateOut: number
+) {
+  if (sampleRateOut === sampleRateIn) {
+    return audioIn;
+  }
+  let sampleRateRatio = sampleRateIn / sampleRateOut;
+  let newLength = Math.round(audioIn.length / sampleRateRatio);
+  let result = new Float32Array(newLength);
+  let offsetResult = 0;
+  let offsetAudioIn = 0;
+
+  console.log(`Downsampling to ${sampleRateOut} kHz...`);
+  while (offsetResult < result.length) {
+    let nextOffsetAudioIn = Math.round((offsetResult + 1) * sampleRateRatio);
+    let accum = 0,
+      count = 0;
+    for (
+      let i = offsetAudioIn;
+      i < nextOffsetAudioIn && i < audioIn.length;
+      i++
+    ) {
+      accum += audioIn[i];
+      count++;
+    }
+    result[offsetResult] = accum / count;
+    offsetResult++;
+    offsetAudioIn = nextOffsetAudioIn;
+  }
+
+  return result;
 }
