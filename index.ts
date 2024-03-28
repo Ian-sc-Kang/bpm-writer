@@ -52,6 +52,8 @@ readdir(folderPath, (err, files) => {
         undefined,
         audioBuffer.sampleRate
       );
+      // non-JS object needs to be explicitly removed from memory
+      audioVector.delete();
 
       console.log("bpm: ", Math.round(computed.bpm));
 
