@@ -41,25 +41,15 @@ readdir(folderPath, (err, files) => {
       const audioMono = essentia.audioBufferToMonoSignal(audioBuffer);
       const audioVector = essentia.arrayToVector(audioMono);
 
-      // https://essentia.upf.edu/reference/std_RhythmExtractor2013.html
-      const computed = essentia.PercivalBpmEstimator(
+      const bpm = detectBPM(audioVector, audioBuffer.sampleRate);
+      const danceability = detectDanceability(
         audioVector,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
         audioBuffer.sampleRate
       );
-      // non-JS object needs to be explicitly removed from memory
-      audioVector.delete();
-
-      console.log("bpm: ", Math.round(computed.bpm));
 
       rename(
         audioFilePath,
-        `${folderPath}/bpm_${Math.round(computed.bpm)}_${file}`,
+        `${folderPath}/bpm_${Math.round(bpm)}_${file}`,
         (err) => {
           if (err) {
             console.log("Error renaming file: ", err);
@@ -67,7 +57,8 @@ readdir(folderPath, (err, files) => {
           }
         }
       );
-      console.log(`✅ bpm_${Math.round(computed.bpm)}_${file}`);
+      console.log("✅ bpm: ", bpm);
+      console.log("✅ danceability: ", danceability);
       console.log("-----------------------------");
     });
   });
@@ -76,4 +67,30 @@ readdir(folderPath, (err, files) => {
 async function convertToAudioBuffer(buffer: Buffer) {
   const audioBuffer = await decode(buffer);
   return audioBuffer;
+}
+
+function detectBPM(vectorFloat: any, sampleRate: number) {
+  const computed = essentia.PercivalBpmEstimator(
+    vectorFloat,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    sampleRate
+  );
+  // non-JS object needs to be explicitly removed from memory
+  return Math.round(computed.bpm);
+}
+
+function detectDanceability(vectorFloat: any, sampleRate: number) {
+  const computed = essentia.Danceability(
+    vectorFloat,
+    undefined,
+    undefined,
+    sampleRate,
+    undefined
+  );
+  return computed.danceability;
 }
