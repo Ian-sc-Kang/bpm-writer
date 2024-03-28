@@ -39,13 +39,13 @@ readdir(folderPath, (err, files) => {
       console.log("sample rate: ", audioBuffer.sampleRate);
 
       const audioMono = essentia.audioBufferToMonoSignal(audioBuffer);
-      const audioVector = essentia.arrayToVector(audioMono);
+      const vectorFloat = essentia.arrayToVector(audioMono);
 
-      const bpm = detectBPM(audioVector, audioBuffer.sampleRate);
-      const danceability = detectDanceability(
-        audioVector,
-        audioBuffer.sampleRate
-      );
+      const bpm = detectBPM(vectorFloat, audioBuffer.sampleRate);
+      // const danceability = detectDanceability(
+      //   vectorFloat,
+      //   audioBuffer.sampleRate
+      // );
 
       rename(
         audioFilePath,
@@ -58,8 +58,10 @@ readdir(folderPath, (err, files) => {
         }
       );
       console.log("✅ bpm: ", bpm);
-      console.log("✅ danceability: ", danceability);
+      // console.log("✅ danceability: ", danceability);
       console.log("-----------------------------");
+
+      vectorFloat.delete();
     });
   });
 });
@@ -92,5 +94,5 @@ function detectDanceability(vectorFloat: any, sampleRate: number) {
     sampleRate,
     undefined
   );
-  return computed.danceability;
+  return Math.round(computed.danceability * 10) / 10;
 }
