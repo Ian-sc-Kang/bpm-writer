@@ -1,3 +1,6 @@
 node_modules
 songs
 .vscode
+.DS_Store
+dist/
+build/
