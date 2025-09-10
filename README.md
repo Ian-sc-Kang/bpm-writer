@@ -45,15 +45,15 @@ npm start ./my-music-collection
 🎵 Found 12 audio files to process
 
 🎵 Processing: awesome-song.mp3
-   📊 Sample rate: 44100 Hz
-   📊 Duration: 7526400 samples
+   📁 Sample rate: 44100 Hz
+   📁 Duration: 7526400 samples
    🔄 Downsampling from 44100 Hz to 16000 Hz...
    🎯 Detected BPM: 128
    ✅ Renamed to: bpm_128_awesome-song.mp3
 
 🎵 Processing: another-track.wav
-   📊 Sample rate: 48000 Hz
-   📊 Duration: 9216000 samples
+   📁 Sample rate: 48000 Hz
+   📁 Duration: 9216000 samples
    🔄 Downsampling from 48000 Hz to 16000 Hz...
    🎯 Detected BPM: 140
    ✅ Renamed to: bpm_140_another-track.wav
