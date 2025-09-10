@@ -1,5 +1,4 @@
 node_modules
-songs
 .vscode
 .DS_Store
 dist/
@@ -8,3 +7,6 @@ build/
 # Compiled JavaScript files
 *.js
 *.js.map
+
+# Test audio files in a directory
+songs
