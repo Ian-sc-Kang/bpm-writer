@@ -6,11 +6,21 @@ const essentia = new esPkg.Essentia(esPkg.EssentiaWASM);
 
 const folderPath = process.argv[2];
 
+if (!folderPath) {
+  console.error('❌ Please provide a directory path as an argument');
+  console.log('Usage: npm start /path/to/your/audio/files');
+  process.exit(1);
+}
+
+console.log(`🔍 Scanning directory: ${folderPath}`);
+
 readdir(folderPath, (err, files) => {
   if (err) {
-    console.log("Error reading directory: ", err);
+    console.error(`❌ Error reading directory: ${err.message}`);
     return;
   }
+
+  console.log(`📁 Found ${files.length} files total`);
 
   const audioFiles = files
     //NOTE: Supported formats: https://github.com/audiojs/audio-decode
@@ -24,6 +34,8 @@ readdir(folderPath, (err, files) => {
         file.endsWith(".qoa"),
     )
     .filter((file) => !file.includes("bpm_"));
+
+  console.log(`🎵 Found ${audioFiles.length} audio files to process`);
 
   if (audioFiles.length === 0) {
     console.log("No audio files to analyze BPM found in the directory");
@@ -86,7 +98,7 @@ readdir(folderPath, (err, files) => {
  */
 async function convertToAudioBuffer(buffer: Buffer): Promise<AudioBuffer> {
   try {
-    const audioBuffer = await decode(buffer);
+    const audioBuffer = await decode(new Uint8Array(buffer));
     return audioBuffer;
   } catch (error) {
     throw new Error(`Failed to decode audio buffer: ${error instanceof Error ? error.message : 'Unknown error'}`);
