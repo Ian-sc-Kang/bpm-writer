@@ -4,3 +4,7 @@ songs
 .DS_Store
 dist/
 build/
+
+# Compiled JavaScript files
+*.js
+*.js.map
