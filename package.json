@@ -1,22 +1,32 @@
 {
   "name": "bpm-writer",
   "version": "1.0.0",
-  "description": "",
+  "description": "Automatic BPM detection and file renaming tool for audio files using Essentia.js",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node index.ts"
+    "start": "ts-node index.ts",
+    "build": "tsc",
+    "dev": "ts-node --watch index.ts"
   },
   "type": "module",
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "bpm",
+    "tempo",
+    "audio-analysis", 
+    "music",
+    "essentia",
+    "audio-processing",
+    "beat-detection"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
   "dependencies": {
     "audio-buffer": "^5.0.0",
     "audio-decode": "^2.2.0",
     "essentia.js": "^0.1.3"
   },
   "devDependencies": {
-    "@types/node": "^20.11.30"
+    "@types/node": "^20.11.30",
+    "ts-node": "^10.9.2"
   }
 }
