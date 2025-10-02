@@ -7,8 +7,8 @@ const essentia = new esPkg.Essentia(esPkg.EssentiaWASM);
 const folderPath = process.argv[2];
 
 if (!folderPath) {
-  console.error('❌ Please provide a directory path as an argument');
-  console.log('Usage: npm start /path/to/your/audio/files');
+  console.error("❌ Please provide a directory path as an argument");
+  console.log("Usage: npm start /path/to/your/audio/files");
   process.exit(1);
 }
 
@@ -49,17 +49,21 @@ readdir(folderPath, (err, files) => {
         console.error(`❌ Error reading file ${file}:`, err.message);
         return;
       }
-      
+
       try {
         const audioBuffer = await convertToAudioBuffer(buffer);
         console.log(`\n🎵 Processing: ${file}`);
         console.log(`   📊 Sample rate: ${audioBuffer.sampleRate} Hz`);
-        console.log(`   📊 Duration: ${audioBuffer.getChannelData(0).length} samples`);
+        console.log(
+          `   📊 Duration: ${audioBuffer.getChannelData(0).length} samples`,
+        );
 
         const audioMono = essentia.audioBufferToMonoSignal(audioBuffer);
         const Down_Sample_RATE = 16000;
-        console.log(`   🔄 Downsampling from ${audioBuffer.sampleRate} Hz to ${Down_Sample_RATE} Hz...`);
-        
+        console.log(
+          `   🔄 Downsampling from ${audioBuffer.sampleRate} Hz to ${Down_Sample_RATE} Hz...`,
+        );
+
         const downsampledArray = downsampleArray(
           audioMono,
           audioBuffer.sampleRate,
@@ -71,21 +75,20 @@ readdir(folderPath, (err, files) => {
         console.log(`   🎯 Detected BPM: ${Math.round(bpm)}`);
 
         const newFileName = `bpm_${Math.round(bpm)}_${file}`;
-        rename(
-          audioFilePath,
-          `${folderPath}/${newFileName}`,
-          (err) => {
-            if (err) {
-              console.error(`   ❌ Error renaming file: ${err.message}`);
-              return;
-            }
-            console.log(`   ✅ Renamed to: ${newFileName}`);
-          },
-        );
+        rename(audioFilePath, `${folderPath}/${newFileName}`, (err) => {
+          if (err) {
+            console.error(`   ❌ Error renaming file: ${err.message}`);
+            return;
+          }
+          console.log(`   ✅ Renamed to: ${newFileName}`);
+        });
 
         vectorFloat.delete();
       } catch (error) {
-        console.error(`   ❌ Error processing ${file}:`, error instanceof Error ? error.message : 'Unknown error');
+        console.error(
+          `   ❌ Error processing ${file}:`,
+          error instanceof Error ? error.message : "Unknown error",
+        );
       }
     });
   });
@@ -101,7 +104,9 @@ async function convertToAudioBuffer(buffer: Buffer): Promise<AudioBuffer> {
     const audioBuffer = await decode(new Uint8Array(buffer));
     return audioBuffer;
   } catch (error) {
-    throw new Error(`Failed to decode audio buffer: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to decode audio buffer: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
   }
 }
 
@@ -115,7 +120,7 @@ function detectBPM(vectorFloat: any, sampleRate: number): number {
   const computed = essentia.PercivalBpmEstimator(
     vectorFloat,
     undefined, // frameSize (default)
-    undefined, // hopSize (default) 
+    undefined, // hopSize (default)
     undefined, // maxBPM (default)
     undefined, // minBPM (default)
     undefined, // stepBPM (default)
@@ -140,7 +145,7 @@ function detectDanceability(vectorFloat: any, sampleRate: number) {
  * Downsamples an audio array from one sample rate to another using simple averaging
  * @param audioIn - Input audio array
  * @param sampleRateIn - Original sample rate in Hz
- * @param sampleRateOut - Target sample rate in Hz  
+ * @param sampleRateOut - Target sample rate in Hz
  * @returns Downsampled audio array
  */
 function downsampleArray(
@@ -151,7 +156,7 @@ function downsampleArray(
   if (sampleRateOut === sampleRateIn) {
     return audioIn;
   }
-  
+
   const sampleRateRatio = sampleRateIn / sampleRateOut;
   const newLength = Math.round(audioIn.length / sampleRateRatio);
   const result = new Float32Array(newLength);
@@ -162,12 +167,16 @@ function downsampleArray(
     const nextOffsetAudioIn = Math.round((offsetResult + 1) * sampleRateRatio);
     let accum = 0;
     let count = 0;
-    
-    for (let i = offsetAudioIn; i < nextOffsetAudioIn && i < audioIn.length; i++) {
+
+    for (
+      let i = offsetAudioIn;
+      i < nextOffsetAudioIn && i < audioIn.length;
+      i++
+    ) {
       accum += audioIn[i];
       count++;
     }
-    
+
     result[offsetResult] = accum / count;
     offsetResult++;
     offsetAudioIn = nextOffsetAudioIn;
